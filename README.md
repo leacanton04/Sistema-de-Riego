@@ -43,3 +43,35 @@ pfa_esp32/
 │   ├── index.html     # Estructura del dashboard y lógica JavaScript (Fetch y JustGage)
 │   └── style.css      # Estilos de la interfaz web
 └── pfa_esp32.ino      # Código principal en C++
+
+## ⚙️ Instalación y Configuración (Importante)
+
+El entorno del ESP32 puede ser sensible a las versiones de las librerías. Para asegurar que el proyecto compile y se ejecute sin reiniciar la placa (evitando el error `tcp_alloc`), sigue estos pasos con precisión:
+
+### 1. Configuración del Arduino IDE
+1. Abre el Gestor de Placas en Arduino IDE.
+2. Busca **`esp32 by Espressif Systems`**.
+3. **⚠️ CRÍTICO:** Instala específicamente la **versión 2.0.17** de esp32 by Espressif Systems". 
+   *(Nota: Las versiones 3.x.x causan incompatibilidad con el servidor web asíncrono, provocando errores de compilación con las funciones MD5 o un reinicio constante de la placa al conectarse al Wi-Fi).*
+
+### 2. Librerías Requeridas
+Instala las siguientes dependencias desde el Gestor de Librerías de Arduino:
+* `DHT sensor library` (por Adafruit)
+* `LiquidCrystal I2C`
+* `ESPAsyncWebServer` (de me-no-dev o lacamera)
+* `AsyncTCP` (de me-no-dev o lacamera)
+
+### 3. Preparación del Sistema de Archivos (LittleFS)
+Para poder alojar la página web HTML y CSS dentro del ESP32, es necesario instalar un plugin en Arduino IDE 2.x:
+1. Descarga el archivo `.vsix` de la herramienta [arduino-littlefs-upload](https://github.com/earlephilhower/arduino-littlefs-upload/releases).
+2. Crea una carpeta llamada `plugins` en la ruta de instalación oculta: `C:\Usuarios\<TuUsuario>\.arduinoIDE\plugins\`.
+3. Pega el archivo `.vsix` descargado dentro de esa carpeta (sin descomprimir).
+4. Reinicia el Arduino IDE por completo.
+
+### 4. Subida del Código y la Interfaz Web
+Existe un bug conocido en Arduino IDE 2.x donde el plugin LittleFS no detecta el puerto COM asignado, arrojando el error *"No port specified"*. Para solucionarlo, realiza la subida en este orden estricto:
+
+1. Configura tus credenciales de Wi-Fi en el archivo `.ino` (`ssid` y `password`).
+2. Conecta el ESP32 por USB y **asegúrate de que el Monitor Serie esté cerrado**.
+3. Sube el código `.ino` normalmente con el botón **Upload** (la flecha verde). Esto fuerza al IDE a registrar el puerto COM temporalmente.
+4. Inmediatamente después de que termine la subida, presiona `F1` (o `Ctrl+Shift+P`), busca y ejecuta el comando **`>Upload LittleFS to Pico/ESP8266/ESP32`**. Esto transferirá la carpeta `data/` a la memoria interna de la placa.
