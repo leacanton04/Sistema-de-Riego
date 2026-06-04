@@ -1,0 +1,123 @@
+/* Estilos Globales - Diseño Limpio y Prolijo */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    background-color: #f7fafc; 
+    color: #2d3748;
+    display: flex;
+    justify-content: center; 
+    padding: 40px 20px;
+}
+
+/* Contenedor Principal */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px; /* Un poco menos de espacio para que entre todo bien */
+    width: 100%;
+    max-width: 450px; 
+}
+
+/* NUEVO: Barra de estado superior */
+.status-bar {
+    background-color: #ffffff;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    background-color: #a0aec0; /* Gris por defecto, JS lo cambia */
+    transition: background-color 0.3s ease;
+}
+
+/* Tarjeta limpia para enmarcar cada gráfico */
+.gauge-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    padding: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gauge-display {
+    width: 280px;
+    height: 180px;
+}
+
+.gauge-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-top: -10px; 
+    text-align: center;
+}
+
+/* --- NUEVO: Estilos para el botón de Riego --- */
+.btn-regar {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: white;
+    background-color: #3182ce; /* Azul agua limpio */
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(49, 130, 206, 0.4);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Efecto al hacer clic */
+.btn-regar:active {
+    transform: scale(0.98);
+}
+
+/* Estado cuando está regando */
+.btn-regar.btn-activo {
+    background-color: #e53e3e; /* Rojo de detención */
+    box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.4);
+    animation: pulso 1.5s infinite;
+}
+
+/* Pequeña animación de palpitación cuando riega */
+@keyframes pulso {
+    0% { opacity: 1; }
+    50% { opacity: 0.85; }
+    100% { opacity: 1; }
+}

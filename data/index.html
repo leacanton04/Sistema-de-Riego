@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Riego Inteligente</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <button id="btn-regar" class="btn-regar">💦 Regar Manualmente</button>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">Modo Actual</span>
+                <span id="valor-modo" class="badge">--</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Bomba de Agua</span>
+                <span id="valor-bomba" class="badge">--</span>
+            </div>
+        </div>
+
+        <div class="gauge-card">
+            <div id="gauge-temp" class="gauge-display"></div>
+            <h3 class="gauge-label">Temperatura Ambiente</h3>
+        </div>
+
+        <div class="gauge-card">
+            <div id="gauge-hum-amb" class="gauge-display"></div>
+            <h3 class="gauge-label">Humedad Ambiente</h3>
+        </div>
+
+        <div class="gauge-card">
+            <div id="gauge-hum-suel" class="gauge-display"></div>
+            <h3 class="gauge-label">Humedad Suelo</h3>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const commonConfig = {
+                min: 0,
+                gaugeWidthScale: 0.55,
+                pointer: false,
+                valueFontColor: "#2d3748",
+                valueFontFamily: "system-ui, -apple-system, sans-serif"
+            };
+
+            var gaugeTemp = new JustGage({
+                id: "gauge-temp", value: 0, max: 50,
+                levelColors: ["#ffb3b3", "#ff4d4d", "#cc0000"], 
+                ...commonConfig
+            });
+
+            var gaugeHumAmb = new JustGage({
+                id: "gauge-hum-amb", value: 0, max: 100,
+                levelColors: ["#b3d9ff", "#3399ff", "#005ce6"],
+                ...commonConfig
+            });
+
+            var gaugeHumSuel = new JustGage({
+                id: "gauge-hum-suel", value: 0, max: 100,
+                levelColors: ["#b3ffb3", "#33cc33", "#008000"],
+                ...commonConfig
+            });
+
+            // Lógica para enviar la orden de regar al ESP32
+            const btnRegar = document.getElementById("btn-regar");
+            btnRegar.addEventListener("click", () => {
+                btnRegar.textContent = "⏳ Enviando orden...";
+                fetch('/toggle-bomba')
+                    .catch(error => console.error("Error al activar bomba:", error));
+            });
+
+            // Petición de actualización cada 2 segundos
+            setInterval(() => {
+                fetch('/datos')
+                    .then(respuesta => respuesta.json())
+                    .then(datos => {
+                        gaugeTemp.refresh(datos.temperatura);
+                        gaugeHumAmb.refresh(datos.humedad_amb);
+                        gaugeHumSuel.refresh(datos.humedad_suelo);
+
+                        const badgeModo = document.getElementById("valor-modo");
+                        const badgeBomba = document.getElementById("valor-bomba");
+                        
+                        badgeModo.textContent = datos.modo;
+                        badgeBomba.textContent = datos.bomba;
+                        badgeModo.style.backgroundColor = (datos.modo === "AUTOMATICO") ? "#805ad5" : "#4a5568";
+                        badgeBomba.style.backgroundColor = (datos.bomba === "ENCENDIDA") ? "#38a169" : "#e53e3e";
+
+                        // Actualizar el diseño del botón principal según el estado real
+                        if (datos.bomba === "ENCENDIDA") {
+                            btnRegar.textContent = "🛑 Regando... (Tocar para parar)";
+                            btnRegar.classList.add("btn-activo");
+                        } else {
+                            btnRegar.textContent = "💦 Regar Manualmente";
+                            btnRegar.classList.remove("btn-activo");
+                        }
+                    })
+                    .catch(error => console.error("Buscando datos del ESP32...", error));
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
