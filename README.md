@@ -43,6 +43,7 @@ pfa_esp32/
 │   ├── index.html     # Estructura del dashboard y lógica JavaScript (Fetch y JustGage)
 │   └── style.css      # Estilos de la interfaz web
 └── pfa_esp32.ino      # Código principal en C++
+```
 
 ## ⚙️ Instalación y Configuración (Importante)
 
