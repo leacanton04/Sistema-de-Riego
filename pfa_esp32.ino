@@ -126,7 +126,7 @@ void setup() {
   lcd.print(F("WiFi OK. IP:"));
   lcd.setCursor(0, 1);
   lcd.print(WiFi.localIP());
-  delay(3000); 
+  delay(10000); 
   lcd.clear(); 
 
   // --- CONFIGURACIÓN DEL SERVIDOR WEB ---
@@ -134,20 +134,22 @@ void setup() {
   // Ruta raíz: Entregar los archivos estáticos desde LittleFS
   server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 
-  // Ruta /datos: Entregar el JSON para los gráficos y los estados
+  // Ruta para ntregar el JSON para los gráficos y los estados
   server.on("/datos", HTTP_GET, [](AsyncWebServerRequest *request){
     String json = "{";
     json += "\"temperatura\":" + String(temperaturaC) + ",";
     json += "\"humedad_amb\":" + String(humedadAmbiente) + ",";
     json += "\"humedad_suelo\":" + String(humedadPct) + ",";
     json += "\"modo\":\"" + String(riegoAutomaticoActivo ? "AUTOMATICO" : "MANUAL") + "\",";
-    json += "\"bomba\":\"" + String(bombaEncendida ? "ENCENDIDA" : "APAGADA") + "\"";
+    json += "\"bomba\":\"" + String(bombaEncendida ? "ENCENDIDA" : "APAGADA") + "\",";
+    json += "\"estado\":\"" + estadoHumedad + "\",";
+    json += "\"ideal\":" + String(humedadIdeal);
     json += "}";
     
     request->send(200, "application/json", json);
   });
 
-  // Ruta nueva para el botón de la web
+  // Ruta para el botón de la web
   server.on("/toggle-bomba", HTTP_GET, [](AsyncWebServerRequest *request){
     if (bombaEncendida) {
       // Si estaba prendida, la apagamos

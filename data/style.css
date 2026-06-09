@@ -1,4 +1,4 @@
-/* Estilos Globales - Diseño Limpio y Prolijo */
+/* Estilos Globales - Dashboard Compacto */
 * {
     margin: 0;
     padding: 0;
@@ -11,111 +11,145 @@ body {
     color: #2d3748;
     display: flex;
     justify-content: center; 
-    padding: 40px 20px;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px 12px;
 }
 
 /* Contenedor Principal */
 .dashboard-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 24px; /* Un poco menos de espacio para que entre todo bien */
+    gap: 12px; 
     width: 100%;
-    max-width: 450px; 
+    max-width: 480px; 
 }
 
-/* NUEVO: Barra de estado superior */
+/* Botón de Riego Manual */
+.btn-regar {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    background-color: #3182ce;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(49, 130, 206, 0.3);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.btn-regar:active {
+    transform: scale(0.98);
+}
+
+.btn-regar.btn-activo {
+    background-color: #e53e3e;
+    box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.3);
+    animation: pulso 1.5s infinite;
+}
+
+/* Barra de estado superior */
 .status-bar {
     background-color: #ffffff;
     width: 100%;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    padding: 12px 10px;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
 }
 
 .status-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    flex: 1;
+    gap: 4px;
 }
 
 .status-label {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: #718096;
+    color: #a0aec0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .badge {
     color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
+    padding: 4px 8px;
+    border-radius: 12px;
     font-weight: bold;
-    font-size: 0.95rem;
-    background-color: #a0aec0; /* Gris por defecto, JS lo cambia */
+    font-size: 0.8rem;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    background-color: #718096;
     transition: background-color 0.3s ease;
 }
 
-/* Tarjeta limpia para enmarcar cada gráfico */
+/* NUEVO: Grilla 2x2 para acomodar los gráficos */
+.gauges-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales arriba */
+    gap: 12px;
+    width: 100%;
+}
+
+/* Tarjeta individual de gráfico */
 .gauge-card {
     background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    padding: 24px;
-    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    padding: 12px 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 }
 
+/* La tarjeta de Humedad Suelo ocupa toda la fila inferior */
+.target-card {
+    grid-column: span 2; 
+}
+
+/* Tamaño de los gráficos superiores */
 .gauge-display {
-    width: 280px;
-    height: 180px;
+    width: 140px; 
+    height: 90px;
+}
+
+/* Tamaño del gráfico inferior (Humedad de Suelo) */
+.target-card .gauge-display {
+    width: 180px; /* Lo hacemos un poco más grande para que destaque */
+    height: 110px;
 }
 
 .gauge-label {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #4a5568;
-    margin-top: -10px; 
+    margin-top: -5px;
     text-align: center;
 }
 
-/* --- NUEVO: Estilos para el botón de Riego --- */
-.btn-regar {
-    width: 100%;
-    padding: 16px;
-    font-size: 1.15rem;
+/* Contenedor de la humedad objetivo */
+.ideal-container {
+    margin-top: 8px;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: white;
-    background-color: #3182ce; /* Azul agua limpio */
-    border: none;
-    border-radius: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px -1px rgba(49, 130, 206, 0.4);
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #2b6cb0;
+    background-color: #ebf8ff;
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid #bee3f8;
 }
 
-/* Efecto al hacer clic */
-.btn-regar:active {
-    transform: scale(0.98);
-}
-
-/* Estado cuando está regando */
-.btn-regar.btn-activo {
-    background-color: #e53e3e; /* Rojo de detención */
-    box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.4);
-    animation: pulso 1.5s infinite;
-}
-
-/* Pequeña animación de palpitación cuando riega */
+/* Animación del botón de riego */
 @keyframes pulso {
     0% { opacity: 1; }
     50% { opacity: 0.85; }
