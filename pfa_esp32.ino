@@ -1,5 +1,5 @@
 // Sensores: Humedad de suelo (GPIO34), DHT11 (GPIO14)
-// Salidas: LED RGB (R:27, V:26, A:25), LCD I2C (SDA:21, SCL:22), Bomba (GPIO32)
+// Salidas: LED RGB (R:27, G:26, B:25), LCD I2C (SDA:21, SCL:22), Bomba (GPIO32)
 // Entradas: Botón Modo Auto/Manual (GPIO16)
 
 #include <Wire.h>
@@ -50,7 +50,7 @@ const float TEMP_BAJA = 15.0;
 const float TEMP_ALTA = 25.0;
 
 const int HUMEDAD_IDEAL_FRIA = 40;
-const int HUMEDAD_IDEAL_MEDIA = 55;
+const int HUMEDAD_IDEAL_MEDIA = 60;
 const int HUMEDAD_IDEAL_CALIDA = 70;
 
 const int MARGEN_ALTO = 10;
@@ -86,11 +86,11 @@ unsigned long ultimoEnvioSerial = 0;
 void setup() {
   delay(3000);
   Serial.begin(9600);
-  Serial.println(F("Iniciando ESP32 con Servidor LittleFS..."));
+  Serial.println(F("Iniciando ESP32 con Servidor LittleFS"));
 
   // Inicializar sistema de archivos LittleFS
   if(!LittleFS.begin(true)){
-    Serial.println("Error montando LittleFS. Asegúrate de haber subido la carpeta 'data'.");
+    Serial.println("Error montando LittleFS");
     return;
   }
   Serial.println("LittleFS montado correctamente.");
@@ -108,6 +108,7 @@ void setup() {
 
   dht.begin(); 
 
+  //Configuracion de los pines
   pinMode(PIN_BOTON, INPUT_PULLUP);
   pinMode(PIN_LED_ROJO,  OUTPUT);
   pinMode(PIN_LED_VERDE, OUTPUT);
@@ -120,6 +121,7 @@ void setup() {
 
   Wire.begin(21, 22); 
   
+  // Inicio de pantalla y muestra de IP del servidor
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
@@ -129,8 +131,7 @@ void setup() {
   delay(10000); 
   lcd.clear(); 
 
-  // --- CONFIGURACIÓN DEL SERVIDOR WEB ---
-  
+  // CONFIGURACIÓN DEL SERVIDOR WEB 
   // Ruta raíz: Entregar los archivos estáticos desde LittleFS
   server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 
@@ -157,14 +158,12 @@ void setup() {
       bombaEncendida = false;
       enfriamientoActivo = true;
       tiempoUltimoRiego = millis();
-      Serial.println(F("[Web] Bomba APAGADA manualmente"));
     } else {
       // Si estaba apagada, la prendemos y forzamos modo MANUAL
       riegoAutomaticoActivo = false; 
       digitalWrite(PIN_BOMBA, HIGH);
       bombaEncendida = true;
       tiempoInicioBomba = millis();
-      Serial.println(F("[Web] Bomba ENCENDIDA manualmente"));
     }
     // Le respondemos a la web que salió todo bien
     request->send(200, "text/plain", "OK");
@@ -180,8 +179,7 @@ void setup() {
 // =============================================================================
 
 void loop() {
-  // Nota: Con ESPAsyncWebServer ya no necesitas server.handleClient();
-  
+
   unsigned long ahora = millis();
 
   gestionarBoton(ahora);
@@ -197,14 +195,17 @@ void loop() {
 
   if (ahora - ultimaActLCD >= TIEMPO_ACTUALIZAR_LCD) {
     ultimaActLCD = ahora;
-    actualizarLCD();
+    //solo se actualiiza si la bomb esta apagada
+    if (!bombaEncendida) {
+      actualizarLCD();
+    }
   }
 
   gestionarBomba(ahora);
 }
 
 // =============================================================================
-// FUNCIONES (Se mantienen iguales)
+// FUNCIONES 
 // =============================================================================
 
 void gestionarBoton(unsigned long ahora) {
@@ -221,15 +222,11 @@ void gestionarBoton(unsigned long ahora) {
       if (estadoBotonActual == LOW) {
         riegoAutomaticoActivo = !riegoAutomaticoActivo; 
         
-        Serial.print(F("[Modo] Cambiado a: "));
-        Serial.println(riegoAutomaticoActivo ? F("AUTOMATICO") : F("MANUAL"));
-
         if (!riegoAutomaticoActivo && bombaEncendida) {
           digitalWrite(PIN_BOMBA, LOW); // APAGAR RELÉ
           bombaEncendida      = false;
           enfriamientoActivo  = true; 
           tiempoUltimoRiego   = ahora;
-          Serial.println(F("[Bomba] APAGADA - Riego interrumpido manualmente"));
         }
 
         actualizarLCD(); 
@@ -312,14 +309,12 @@ void setLED(int r, int g, int b) {
 void controlarBomba(unsigned long ahora) {
   if (enfriamientoActivo && (ahora - tiempoUltimoRiego >= TIEMPO_ENFRIAMIENTO)) {
     enfriamientoActivo = false;
-    Serial.println(F("[Bomba] Enfriamiento terminado."));
   }
 
   if (riegoAutomaticoActivo && estadoHumedad == "Muy seca" && !bombaEncendida && !enfriamientoActivo) {
     digitalWrite(PIN_BOMBA, HIGH); 
     bombaEncendida     = true;
     tiempoInicioBomba  = ahora;
-    Serial.println(F("[Bomba] ENCENDIDA - Regando (Modo Auto)"));
   }
 }
 
@@ -329,10 +324,6 @@ void gestionarBomba(unsigned long ahora) {
     bombaEncendida      = false;
     enfriamientoActivo  = true;
     tiempoUltimoRiego   = ahora;
-
-    Serial.print(F("Esperando para volver a regar en "));
-    Serial.print(TIEMPO_ENFRIAMIENTO / 1000); 
-    Serial.println(F(" seg."));
   }
 }
 
